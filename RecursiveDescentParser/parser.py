@@ -4,24 +4,6 @@ from lexer import to_lex
 import sys
 
 
-class Node:
-
-    def __init__(self, left, right, name):
-        self.left = left
-        self.right = right
-        self.name = name
-
-    def __str__(self):
-        result = '('
-        if self.left is not None:
-            result += str(self.left)
-        result += " " + self.name + ' '
-        if self.right is not None:
-            result += str(self.right)
-        result += ')'
-        return result
-
-
 class Parser:
 
     def __init__(self, string: str):
@@ -29,8 +11,8 @@ class Parser:
         self.current_token = next(self.lexer)
 
         while self.current_token is not None:
-            tree = self.Definition()
-            if tree is None:
+            result = self.Definition()
+            if not result:
                 return
 
         print("OK")
@@ -58,67 +40,66 @@ class Parser:
                                    f'pos: {self.current_token.lexpos}')
         return False
 
-    def Literal(self) -> (Node, None):
+    def Literal(self) -> bool:
         if self.current_token is None:
             print("Expected literal in the end")
-            return None
+            return False
 
         if self.accept('('):
             block = self.Disjunction()
-            if block is not None and self.expect(')'):
-                return block
-            return None
+            if block and self.expect(')'):
+                return True
+            return False
 
         if str(self.current_token.type) != 'ID':
             print(f'Expected literal at line: {self.current_token.lineno}, '
                   f'pos: {self.current_token.lexpos}')
-            return None
+            return False
 
-        name = self.current_token.value
         self.current_token = next(self.lexer)
-        return Node(None, None, name)
+        return True
 
-    def Disjunction(self) -> (Node, None):
+    def Disjunction(self) -> bool:
         left = self.Conjunction()
-        if left is None:
-            return None
+        if not left:
+            return False
 
         if self.accept(';'):
             right = self.Disjunction()
-            if right is None:
-                return None
-            return Node(left, right, 'or')
+            if not right:
+                return False
+            return True
 
-        return left
+        return True
 
-    def Conjunction(self) -> (Node, None):
+    def Conjunction(self) -> bool:
         left = self.Literal()
-        if left is None:
-            return None
+        if not left:
+            return False
 
         if self.accept(','):
             right = self.Conjunction()
-            if right is None:
-                return None
-            return Node(left, right, 'and')
+            if not right:
+                return False
+            return True
 
-        return left
+        return True
 
-    def Definition(self) -> (Node, None):
+    def Definition(self) -> bool:
         head = self.Literal()
-        if head is None:
-            return None
+        if not head:
+            return False
 
         if self.accept(':-'):
             body = self.Disjunction()
-            if body is not None and self.expect('.'):
-                return Node(head, body, "define")
-            return None
+            if body and self.expect('.'):
+                return True
+            return False
 
         if not self.expect('.'):
-            return None
+            return False
 
-        return head
+        return True
 
 
 def main(filename: str):
