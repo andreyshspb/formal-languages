@@ -1,5 +1,5 @@
 
-from lexer import to_lex
+from lexer import Lexer
 
 import sys
 
@@ -7,7 +7,7 @@ import sys
 class Parser:
 
     def __init__(self, string: str):
-        self.lexer = to_lex(string)
+        self.lexer = Lexer(string)
         self.current_token = next(self.lexer)
 
         while self.current_token is not None:

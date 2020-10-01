@@ -65,13 +65,16 @@ def token_column(string: str, token) -> int:
     return token.lexpos - line_start
 
 
-def to_lex(text: str):
-    lexer = lex.lex()
-    lexer.input(text)
-    while True:
-        token = lexer.token()
-        if not token:
-            while True:
-                yield None
-        token.lexpos = token_column(text, token)
-        yield token
+class Lexer:
+
+    def __init__(self, text: str):
+        self.lexer = lex.lex()
+        self.lexer.input(text)
+        self.text = text
+
+    def __next__(self):
+        token = self.lexer.token()
+        if token is None:
+            return None
+        token.lexpos = token_column(self.text, token)
+        return token
