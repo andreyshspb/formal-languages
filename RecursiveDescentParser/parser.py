@@ -46,10 +46,7 @@ class Parser:
             return False
 
         if self.accept('('):
-            block = self.Disjunction()
-            if block and self.expect(')'):
-                return True
-            return False
+            return self.Disjunction() and self.expect(')')
 
         if str(self.current_token.type) != 'ID':
             print(f'Expected literal at line: {self.current_token.lineno}, '
@@ -60,46 +57,25 @@ class Parser:
         return True
 
     def Disjunction(self) -> bool:
-        left = self.Conjunction()
-        if not left:
+        if not self.Conjunction():
             return False
-
         if self.accept(';'):
-            right = self.Disjunction()
-            if not right:
-                return False
-            return True
-
+            return self.Disjunction()
         return True
 
     def Conjunction(self) -> bool:
-        left = self.Literal()
-        if not left:
+        if not self.Literal():
             return False
-
         if self.accept(','):
-            right = self.Conjunction()
-            if not right:
-                return False
-            return True
-
+            return self.Conjunction()
         return True
 
     def Definition(self) -> bool:
-        head = self.Literal()
-        if not head:
+        if not self.Literal():
             return False
-
         if self.accept(':-'):
-            body = self.Disjunction()
-            if body and self.expect('.'):
-                return True
-            return False
-
-        if not self.expect('.'):
-            return False
-
-        return True
+            return self.Disjunction() and self.expect('.')
+        return self.expect('.')
 
 
 def main(filename: str):
