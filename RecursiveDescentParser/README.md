@@ -12,3 +12,8 @@
     ```
     sudo pip install pytest
     ```
+    
+* И наконец, запуск программы:
+    ```
+    python parser.py filename
+    ```
