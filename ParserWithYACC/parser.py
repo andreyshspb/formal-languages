@@ -83,7 +83,7 @@ def to_parse(text: str) -> str:
             continue
         result = parser.parse(expression)
         if result is None:
-            return f'There is a problem in "{expression.strip()}"'
+            return f'There is a problem in "{expression.strip()}"\n'
         output_data += result + '\n'
 
     return output_data

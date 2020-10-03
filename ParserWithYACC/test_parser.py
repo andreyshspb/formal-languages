@@ -43,7 +43,7 @@ def test_integrate_no_dot(tmp_path, monkeypatch, capsys):
     out, err = capsys.readouterr()
     assert err == ''
     assert out == ''
-    assert open('a.out', 'r').read() == 'There is a problem in "f"'
+    assert open('a.out', 'r').read() == 'There is a problem in "f"\n'
 
 
 def test_integrate_no_head(tmp_path, monkeypatch, capsys):
@@ -55,7 +55,7 @@ def test_integrate_no_head(tmp_path, monkeypatch, capsys):
     out, err = capsys.readouterr()
     assert err == ''
     assert out == ''
-    assert open('a.out', 'r').read() == 'There is a problem in ":- f"'
+    assert open('a.out', 'r').read() == 'There is a problem in ":- f"\n'
 
 
 def test_integrate_no_body(tmp_path, monkeypatch, capsys):
@@ -67,7 +67,7 @@ def test_integrate_no_body(tmp_path, monkeypatch, capsys):
     out, err = capsys.readouterr()
     assert err == ''
     assert out == ''
-    assert open('a.out', 'r').read() == 'There is a problem in "f :- ."'
+    assert open('a.out', 'r').read() == 'There is a problem in "f :- ."\n'
 
 
 def test_integrate_right_part(tmp_path, monkeypatch, capsys):
@@ -79,7 +79,7 @@ def test_integrate_right_part(tmp_path, monkeypatch, capsys):
     out, err = capsys.readouterr()
     assert err == ''
     assert out == ''
-    assert open('a.out', 'r').read() == 'There is a problem in "f :- g; h, ."'
+    assert open('a.out', 'r').read() == 'There is a problem in "f :- g; h, ."\n'
 
 
 def test_integrate_unbalanced_paren(tmp_path, monkeypatch, capsys):
@@ -91,7 +91,7 @@ def test_integrate_unbalanced_paren(tmp_path, monkeypatch, capsys):
     out, err = capsys.readouterr()
     assert err == ''
     assert out == ''
-    assert open('a.out', 'r').read() == 'There is a problem in "f :- (g; (f)."'
+    assert open('a.out', 'r').read() == 'There is a problem in "f :- (g; (f)."\n'
 
 
 def test_integrate_empty(tmp_path, monkeypatch, capsys):
@@ -103,7 +103,7 @@ def test_integrate_empty(tmp_path, monkeypatch, capsys):
     out, err = capsys.readouterr()
     assert err == ''
     assert out == ''
-    assert open('a.out', 'r').read() == 'There is a problem in "f ()."'
+    assert open('a.out', 'r').read() == 'There is a problem in "f ()."\n'
 
 
 
