@@ -1,0 +1,8 @@
+# yacc
+parser.out
+parsetab.py
+__pycache__
+
+# pycharm 
+.idea 
+venv 
