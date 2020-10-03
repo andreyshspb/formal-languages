@@ -1,5 +1,8 @@
 
 import ply.yacc as yacc
+import re
+import sys
+import os
 
 from lexer import tokens
 
@@ -61,20 +64,37 @@ def p_id(p):
 
 
 def p_error(p):
-    print(p, 'Syntax error')
+    return None
+
+
+def to_parse(text: str) -> str:
+    parser = yacc.yacc()
+
+    lines = text.split('.')
+    lines.pop()
+    for i in range(len(lines)):
+        lines[i] += '.'
+
+    output_data = ''
+    for line in lines:
+        result = parser.parse(line)
+        if result is None:
+            return f'There is a problem in "{line.strip()}"'
+        output_data += result + '\n'
+
+    return output_data
+
+
+def main(filename: str):
+    with open(filename, 'r') as file:
+        text = file.read()
+
+    output_filename = re.search(r'[^.]+', filename).group(0) + '.out'
+    with open(output_filename, 'w') as file:
+        file.write(to_parse(text))
 
 
 if __name__ == '__main__':
-
-    parser = yacc.yacc()
-
-    while True:
-        try:
-            s = input("calc> ")
-        except EOFError:
-            break
-        if not s:
-            continue
-        result = parser.parse(s)
-        print(result)
+    main(sys.argv[1])
+    os.system('cat mortal.out')
 
