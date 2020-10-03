@@ -2,7 +2,6 @@
 import ply.yacc as yacc
 import re
 import sys
-import os
 
 from lexer import tokens
 
@@ -40,7 +39,7 @@ def p_expression(p):
     if len(p) == 2:
         p[0] = p[1]
     elif len(p) == 4:
-        p[0] = f'({p[2]})'
+        p[0] = f'{p[2]}'
 
 
 def p_atom(p):
@@ -70,16 +69,21 @@ def p_error(p):
 def to_parse(text: str) -> str:
     parser = yacc.yacc()
 
-    lines = text.split('.')
-    lines.pop()
-    for i in range(len(lines)):
-        lines[i] += '.'
+    expressions = []
+    lines = text.splitlines()
+    for line in lines:
+        buffer = line.split('.')
+        for i in range(len(buffer) - 1):
+            expressions.append(buffer[i] + '.')
+        expressions.append(buffer[len(buffer) - 1].strip())
 
     output_data = ''
-    for line in lines:
-        result = parser.parse(line)
+    for expression in expressions:
+        if expression == '':
+            continue
+        result = parser.parse(expression)
         if result is None:
-            return f'There is a problem in "{line.strip()}"'
+            return f'There is a problem in "{expression.strip()}"'
         output_data += result + '\n'
 
     return output_data
@@ -96,5 +100,4 @@ def main(filename: str):
 
 if __name__ == '__main__':
     main(sys.argv[1])
-    os.system('cat mortal.out')
 
