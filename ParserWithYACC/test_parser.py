@@ -42,7 +42,7 @@ def test_integrate_specific_good_file(tmp_path, monkeypatch, capsys):
     assert err == ''
     assert open('a.out', 'r').read() == 'f (g)\n' \
                                         'f ((g))\n' \
-                                        'DEFINITION (f) (((g)))\n'
+                                        'DEFINITION (f) (g)\n'
 
 
 def test_integrate_no_dot1(tmp_path, monkeypatch, capsys):

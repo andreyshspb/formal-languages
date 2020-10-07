@@ -34,7 +34,7 @@ def p_and(p):
 
 
 def p_expression(p):
-    '''expression : atom
+    '''expression : variable
                   | LPAREN or RPAREN'''
     if len(p) == 2:
         p[0] = p[1]
@@ -51,16 +51,34 @@ def p_head(p):
         p[0] = f'{p[1]} {p[2]}'
 
 
-def p_atom(p):
-    '''atom : id
-            | LPAREN atom RPAREN
-            | atom atom'''
+def p_variable(p):
+    '''variable : id
+                | id variable
+                | id LPAREN variable RPAREN
+                | id LPAREN variable RPAREN variable'''
     if len(p) == 2:
         p[0] = p[1]
-    elif len(p) == 4:
-        p[0] = f'({p[2]})'
     elif len(p) == 3:
         p[0] = f'{p[1]} {p[2]}'
+    elif len(p) == 5:
+        p[0] = f'{p[1]} ({p[3]})'
+    elif len(p) == 6:
+        p[0] = f'{p[1]} ({p[3]}) {p[5]}'
+
+
+def p_atom(p):
+    '''atom : id
+            | id atom
+            | LPAREN atom RPAREN
+            | LPAREN atom RPAREN atom'''
+    if len(p) == 2:
+        p[0] = p[1]
+    elif len(p) == 3:
+        p[0] = f'{p[1]} {p[2]}'
+    elif len(p) == 4:
+        p[0] = f'({p[2]})'
+    elif len(p) == 5:
+        p[0] = f'({p[2]}) {p[4]}'
 
 
 def p_id(p):
