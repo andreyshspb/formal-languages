@@ -7,8 +7,8 @@ from lexer import tokens
 
 
 def p_definition(p):
-    '''definition : atom END
-                  | atom DEFINITION or END'''
+    '''definition : head END
+                  | head DEFINITION or END'''
     if len(p) == 3:
         p[0] = p[1]
     elif len(p) == 5:
@@ -39,22 +39,28 @@ def p_expression(p):
     if len(p) == 2:
         p[0] = p[1]
     elif len(p) == 4:
-        p[0] = f'{p[2]}'
-
-
-def p_atom(p):
-    '''atom : id
-            | id atom
-            | id LPAREN atom RPAREN
-            | id LPAREN atom RPAREN atom'''
+        p[0] = p[2]
+        
+        
+def p_head(p):
+    '''head : id
+            | id atom'''
     if len(p) == 2:
         p[0] = p[1]
     elif len(p) == 3:
         p[0] = f'{p[1]} {p[2]}'
-    elif len(p) == 5:
-        p[0] = f'{p[1]} ({p[3]})'
-    elif len(p) == 6:
-        p[0] = f'{p[1]} ({p[3]}) {p[5]}'
+
+
+def p_atom(p):
+    '''atom : id
+            | LPAREN atom RPAREN
+            | atom atom'''
+    if len(p) == 2:
+        p[0] = p[1]
+    elif len(p) == 4:
+        p[0] = f'({p[2]})'
+    elif len(p) == 3:
+        p[0] = f'{p[1]} {p[2]}'
 
 
 def p_id(p):
@@ -63,27 +69,26 @@ def p_id(p):
 
 
 def p_error(p):
-    return None
+    raise SyntaxError
 
 
 def to_parse(text: str) -> str:
     parser = yacc.yacc()
 
-    expressions = []
-    lines = text.splitlines()
-    for line in lines:
-        buffer = line.split('.')
-        for i in range(len(buffer) - 1):
-            expressions.append(buffer[i] + '.')
-        expressions.append(buffer[len(buffer) - 1].strip())
+    expressions = text.split('.')
+    for i in range(len(expressions) - 1):
+        expressions[i] += '.'
 
     output_data = ''
     for expression in expressions:
-        if expression == '':
+        if expression.strip() == '':
             continue
-        result = parser.parse(expression)
-        if result is None:
+
+        try:
+            result = parser.parse(expression)
+        except SyntaxError:
             return f'There is a problem in "{expression.strip()}"\n'
+
         output_data += result + '\n'
 
     return output_data
