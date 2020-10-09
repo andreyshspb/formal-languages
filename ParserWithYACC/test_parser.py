@@ -31,12 +31,14 @@ def test_integrate_good_file(tmp_path, monkeypatch):
 def test_integrate_specific_good_file(tmp_path, monkeypatch):
     (tmp_path / 'a.txt').write_text('f (g).\n'
                                     'f ((g)).\n'
-                                    'f :- ((g)).')
+                                    'f :- ((g)).\n'
+                                    'f :- a (c) (c).')
     monkeypatch.chdir(tmp_path)
     parser.main('a.txt')
     assert open('a.out', 'r').read() == 'f (g)\n' \
                                         'f ((g))\n' \
-                                        'DEFINITION (f) (g)\n'
+                                        'DEFINITION (f) (g)\n' \
+                                        'DEFINITION (f) (a (c) (c))\n'
 
 
 def test_integrate_no_dot1(tmp_path, monkeypatch):
@@ -99,7 +101,7 @@ def test_integrate_empty(tmp_path, monkeypatch):
     assert open('a.out', 'r').read() == 'There is a problem in "f ()."\n'
 
 
-def test_integrate_head_in_brackets(tmp_path, monkeypatch):
+def test_integrate_head_in_brackets1(tmp_path, monkeypatch):
     (tmp_path / 'a.txt').write_text('f.\n'
                                     '(a) :- f.')
     monkeypatch.chdir(tmp_path)
@@ -113,4 +115,17 @@ def test_integrate_wrong_head(tmp_path, monkeypatch):
     parser.main('a.txt')
     assert open('a.out', 'r').read() == 'There is a problem in "g, h :- g."\n'
 
+
+def test_integrate_head_in_brackets2(tmp_path, monkeypatch):
+    (tmp_path / 'a.txt').write_text('a ((b) c).')
+    monkeypatch.chdir(tmp_path)
+    parser.main('a.txt')
+    assert open('a.out', 'r').read() == 'There is a problem in "a ((b) c)."\n'
+
+
+def test_integrate_head_in_brackets3(tmp_path, monkeypatch):
+    (tmp_path / 'a.txt').write_text('f :- a ((a b) (a b)).')
+    monkeypatch.chdir(tmp_path)
+    parser.main('a.txt')
+    assert open('a.out', 'r').read() == 'There is a problem in "f :- a ((a b) (a b))."\n'
 

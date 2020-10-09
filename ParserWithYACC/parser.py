@@ -7,8 +7,8 @@ from lexer import tokens
 
 
 def p_definition(p):
-    '''definition : head END
-                  | head DEFINITION or END'''
+    '''definition : atom END
+                  | atom DEFINITION or END'''
     if len(p) == 3:
         p[0] = p[1]
     elif len(p) == 5:
@@ -34,28 +34,19 @@ def p_and(p):
 
 
 def p_expression(p):
-    '''expression : variable
+    '''expression : atom
                   | LPAREN or RPAREN'''
     if len(p) == 2:
         p[0] = p[1]
     elif len(p) == 4:
         p[0] = p[2]
-        
-        
-def p_head(p):
-    '''head : id
-            | id atom'''
-    if len(p) == 2:
-        p[0] = p[1]
-    elif len(p) == 3:
-        p[0] = f'{p[1]} {p[2]}'
 
 
-def p_variable(p):
-    '''variable : id
-                | id variable
-                | id LPAREN variable RPAREN
-                | id LPAREN variable RPAREN variable'''
+def p_atom(p):
+    '''atom : id
+            | id atom
+            | id LPAREN parameter RPAREN
+            | id LPAREN parameter RPAREN parameter'''
     if len(p) == 2:
         p[0] = p[1]
     elif len(p) == 3:
@@ -66,19 +57,13 @@ def p_variable(p):
         p[0] = f'{p[1]} ({p[3]}) {p[5]}'
 
 
-def p_atom(p):
-    '''atom : id
-            | id atom
-            | LPAREN atom RPAREN
-            | LPAREN atom RPAREN atom'''
+def p_parameter(p):
+    '''parameter : atom
+                 | LPAREN parameter RPAREN'''
     if len(p) == 2:
         p[0] = p[1]
-    elif len(p) == 3:
-        p[0] = f'{p[1]} {p[2]}'
     elif len(p) == 4:
         p[0] = f'({p[2]})'
-    elif len(p) == 5:
-        p[0] = f'({p[2]}) {p[4]}'
 
 
 def p_id(p):
