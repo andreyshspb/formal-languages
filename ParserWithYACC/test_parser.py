@@ -129,3 +129,10 @@ def test_integrate_head_in_brackets3(tmp_path, monkeypatch):
     parser.main('a.txt')
     assert open('a.out', 'r').read() == 'There is a problem in "f :- a ((a b) (a b))."\n'
 
+
+def test_integrate_syntax_error(tmp_path, monkeypatch):
+    (tmp_path / 'a.txt').write_text(r'f :- x\ y.')
+    monkeypatch.chdir(tmp_path)
+    parser.main('a.txt')
+    assert open('a.out', 'r').read() == r'There is a problem in "f :- x\ y."' + '\n'
+
