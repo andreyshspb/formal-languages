@@ -54,9 +54,9 @@ def tree_brackets_atom(data):
 def tree_other_atom(data):
     if len(data) == 1:
         return data
-    elif len(data) == 4:
+    elif len(data) == 2:
         data = delete_lists(data)
-        return [f'({data[1]}) {data[3]}']
+        return [f'{data[0]} {data[1]}']
 
 
 def tree_definition(data):
@@ -68,7 +68,7 @@ def tree_definition(data):
         return [f'DEFINITION ({data[0]}) ({data[2]})']
 
 
-def tree_program(data):
+def tree_definitions(data):
     data = delete_lists(data)
     result = ""
     for line in data:
@@ -78,8 +78,10 @@ def tree_program(data):
 
 class PrologParsers(TextParsers, whitespace='[ \t\n]*'):
 
-    identifier = reg('[a-zA-Z_][a-zA-Z_0-9]*') > (lambda x: [x])
-    variable = pred(identifier, lambda x: x != ['module'], 'variable')
+    name = reg('[a-zA-Z_][a-zA-Z_0-9]*') > (lambda x: [x])
+    identifier = pred(name, lambda x: x != ['module'], 'identifier')
+    variable = pred(identifier, lambda x: 'A' <= x[0][0] <= 'Z', 'variable')
+    not_variable = pred(identifier, lambda x: x[0][0] < 'A' or 'Z' < x[0][0], 'not variable')
 
     atom = fwd()
     brackets_atom = fwd()
@@ -87,15 +89,16 @@ class PrologParsers(TextParsers, whitespace='[ \t\n]*'):
     expression = fwd()
     conjunction = fwd()
     disjunction = fwd()
-    definition = fwd()
 
-    atom.define(variable & other_atom |
-                variable > tree_atom)
+    atom.define(not_variable & other_atom |
+                not_variable > tree_atom)
 
     brackets_atom.define('(' & brackets_atom & ')' |
                          atom > tree_brackets_atom)
 
-    other_atom.define('(' & brackets_atom & ')' & other_atom |
+    other_atom.define(variable & other_atom |
+                      variable |
+                      brackets_atom & other_atom |
                       brackets_atom > tree_other_atom)
 
     expression.define(atom |
@@ -107,10 +110,13 @@ class PrologParsers(TextParsers, whitespace='[ \t\n]*'):
     disjunction.define(conjunction & ';' & disjunction |
                        conjunction > tree_disjunction)
 
-    definition.define(atom & '.' |
-                      atom & ':-' & disjunction & '.' > tree_definition)
+    definition = (atom & '.' | atom & ':-' & disjunction & '.') > tree_definition
 
-    program = rep(definition) > tree_program
+    module = ('module' & not_variable & '.') > (lambda x: f'{x[0]} {x[1][0]}')
+
+    definitions = rep(definition) > tree_definitions
+
+    program = (module & definitions) > (lambda x: f'{x[0]}\n\n{x[1]}')
 
 
 def to_parse(text: str) -> (bool, str):
@@ -133,4 +139,3 @@ def main(filename: str) -> bool:
 
 if __name__ == '__main__':
     main(sys.argv[1])
-
