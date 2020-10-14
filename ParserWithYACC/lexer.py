@@ -26,7 +26,7 @@ t_ignore = ' \t\n'
 
 
 def t_error(t):
-    raise SyntaxError
+    raise SyntaxError(t)
 
 
 lexer = lex.lex()

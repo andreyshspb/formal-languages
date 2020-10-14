@@ -32,13 +32,15 @@ def test_integrate_specific_good_file(tmp_path, monkeypatch):
     (tmp_path / 'a.txt').write_text('f (g).\n'
                                     'f ((g)).\n'
                                     'f :- ((g)).\n'
-                                    'f :- a (c) (c).')
+                                    'f :- a (c) (c).\n'
+                                    'f (a) (a) (a) (a b) (a) a.')
     monkeypatch.chdir(tmp_path)
     parser.main('a.txt')
     assert open('a.out', 'r').read() == 'f (g)\n' \
                                         'f ((g))\n' \
                                         'DEFINITION (f) (g)\n' \
-                                        'DEFINITION (f) (a (c) (c))\n'
+                                        'DEFINITION (f) (a (c) (c))\n' \
+                                        'f (a) (a) (a) (a b) (a) a\n'
 
 
 def test_integrate_no_dot1(tmp_path, monkeypatch):

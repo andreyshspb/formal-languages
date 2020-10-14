@@ -44,26 +44,29 @@ def p_expression(p):
 
 def p_atom(p):
     '''atom : id
-            | id atom
-            | id LPAREN parameter RPAREN
-            | id LPAREN parameter RPAREN parameter'''
+            | id otheratom'''
     if len(p) == 2:
         p[0] = p[1]
     elif len(p) == 3:
         p[0] = f'{p[1]} {p[2]}'
-    elif len(p) == 5:
-        p[0] = f'{p[1]} ({p[3]})'
-    elif len(p) == 6:
-        p[0] = f'{p[1]} ({p[3]}) {p[5]}'
 
 
-def p_parameter(p):
-    '''parameter : atom
-                 | LPAREN parameter RPAREN'''
+def p_bracketsatom(p):
+    '''bracketsatom : atom
+                    | LPAREN bracketsatom RPAREN'''
     if len(p) == 2:
         p[0] = p[1]
     elif len(p) == 4:
         p[0] = f'({p[2]})'
+
+
+def p_otheratom(p):
+    '''otheratom : bracketsatom
+                 | LPAREN bracketsatom RPAREN otheratom'''
+    if len(p) == 2:
+        p[0] = p[1]
+    elif len(p) == 5:
+        p[0] = f'({p[2]}) {p[4]}'
 
 
 def p_id(p):
@@ -72,7 +75,7 @@ def p_id(p):
 
 
 def p_error(p):
-    raise SyntaxError
+    raise SyntaxError(p)
 
 
 def to_parse(text: str) -> str:
@@ -108,4 +111,3 @@ def main(filename: str):
 
 if __name__ == '__main__':
     main(sys.argv[1])
-
