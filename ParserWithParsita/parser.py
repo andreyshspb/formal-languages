@@ -68,9 +68,18 @@ def tree_definition(data):
         return [f'DEFINITION ({data[0]}) ({data[2]})']
 
 
+def tree_program(data):
+    data = delete_lists(data)
+    result = ""
+    for line in data:
+        result += line + '\n'
+    return result
+
+
 class PrologParsers(TextParsers, whitespace='[ \t\n]*'):
 
     identifier = reg('[a-zA-Z_][a-zA-Z_0-9]*') > (lambda x: [x])
+    variable = pred(identifier, lambda x: x != ['module'], 'variable')
 
     atom = fwd()
     brackets_atom = fwd()
@@ -80,8 +89,8 @@ class PrologParsers(TextParsers, whitespace='[ \t\n]*'):
     disjunction = fwd()
     definition = fwd()
 
-    atom.define(identifier & other_atom |
-                identifier > tree_atom)
+    atom.define(variable & other_atom |
+                variable > tree_atom)
 
     brackets_atom.define('(' & brackets_atom & ')' |
                          atom > tree_brackets_atom)
@@ -101,25 +110,14 @@ class PrologParsers(TextParsers, whitespace='[ \t\n]*'):
     definition.define(atom & '.' |
                       atom & ':-' & disjunction & '.' > tree_definition)
 
+    program = rep(definition) > tree_program
+
 
 def to_parse(text: str) -> (bool, str):
-
-    expressions = text.split('.')
-    for i in range(len(expressions) - 1):
-        expressions[i] += '.'
-
-    output_data = ''
-    for expression in expressions:
-        if expression.strip() == '':
-            continue
-
-        result = PrologParsers.definition.parse(expression)
-        if isinstance(result, Failure):
-            return False, result.message
-
-        output_data += result.value[0] + '\n'
-
-    return True, output_data
+    result = PrologParsers.program.parse(text)
+    if isinstance(result, Failure):
+        return False, result.message
+    return True, result.value
 
 
 def main(filename: str) -> bool:
