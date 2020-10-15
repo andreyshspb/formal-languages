@@ -184,3 +184,40 @@ def test_integrate_variable_error3(tmp_path, monkeypatch):
     monkeypatch.chdir(tmp_path)
     parser.main('a.txt')
     assert not parser.main('a.txt')
+
+
+def test_integrate_module_in_center(tmp_path, monkeypatch):
+    (tmp_path / 'a.txt').write_text('first :- second.\n'
+                                    'module prolog.\n'
+                                    'second :- first.')
+    monkeypatch.chdir(tmp_path)
+    parser.main('a.txt')
+    assert not parser.main('a.txt')
+
+
+def test_integrate_module(tmp_path, monkeypatch):
+    (tmp_path / 'a.txt').write_text('module prolog.')
+    monkeypatch.chdir(tmp_path)
+    parser.main('a.txt', '--module')
+    assert open('a.out', 'r').read() == 'module prolog'
+
+
+def test_integrate_relation(tmp_path, monkeypatch):
+    (tmp_path / 'a.txt').write_text('first :- second Third.')
+    monkeypatch.chdir(tmp_path)
+    parser.main('a.txt', '--relation')
+    assert open('a.out', 'r').read() == 'DEFINITION (first) (second Third)'
+
+
+def test_integrate_atom(tmp_path, monkeypatch):
+    (tmp_path / 'a.txt').write_text('second Third (lol KeK)')
+    monkeypatch.chdir(tmp_path)
+    parser.main('a.txt', '--atom')
+    assert open('a.out', 'r').read() == 'second Third (lol KeK)'
+
+
+def test_integrate_bad_atom(tmp_path, monkeypatch):
+    (tmp_path / 'a.txt').write_text('second Third (Lol KeK)')
+    monkeypatch.chdir(tmp_path)
+    parser.main('a.txt', '--atom')
+    assert not parser.main('a.txt', '--atom')

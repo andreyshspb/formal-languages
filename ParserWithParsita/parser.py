@@ -73,7 +73,7 @@ def tree_definitions(data):
     result = ""
     for line in data:
         result += line + '\n'
-    return result
+    return [result]
 
 
 class PrologParsers(TextParsers, whitespace='[ \t\n]*'):
@@ -112,30 +112,43 @@ class PrologParsers(TextParsers, whitespace='[ \t\n]*'):
 
     definition = (atom & '.' | atom & ':-' & disjunction & '.') > tree_definition
 
-    module = ('module' & not_variable & '.') > (lambda x: f'{x[0]} {x[1][0]}')
+    module = ('module' & not_variable & '.') > (lambda x: [f'{x[0]} {x[1][0]}'])
 
     definitions = rep(definition) > tree_definitions
 
-    program = (module & definitions) > (lambda x: f'{x[0]}\n\n{x[1]}')
+    program = (module & definitions) > (lambda x: [f'{x[0][0]}\n\n{x[1][0]}'])
 
 
-def to_parse(text: str) -> (bool, str):
-    result = PrologParsers.program.parse(text)
+def to_parse(text: str, flag: str) -> (bool, str):
+    result = None
+    if flag == '--prog':
+        result = PrologParsers.program.parse(text)
+    elif flag == '--module':
+        result = PrologParsers.module.parse(text)
+    elif flag == '--relation':
+        result = PrologParsers.definition.parse(text)
+    elif flag == '--atom':
+        result = PrologParsers.atom.parse(text)
     if isinstance(result, Failure):
         return False, result.message
-    return True, result.value
+    assert result is not None
+    return True, result.value[0]
 
 
-def main(filename: str) -> bool:
+def main(filename: str, flag='--prog') -> bool:
     with open(filename, 'r') as file:
         text = file.read()
 
     output_filename = re.search(r'[^.]+', filename).group(0) + '.out'
     with open(output_filename, 'w') as file:
-        verdict, message = to_parse(text)
+        verdict, message = to_parse(text, flag)
         file.write(message)
         return verdict
 
 
 if __name__ == '__main__':
-    main(sys.argv[1])
+
+    if len(sys.argv) == 2:
+        main(sys.argv[1])
+    else:
+        main(sys.argv[1], sys.argv[2])
