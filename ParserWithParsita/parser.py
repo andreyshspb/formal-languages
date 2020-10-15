@@ -76,6 +76,20 @@ def tree_definitions(data):
     return [result]
 
 
+def tree_module(data):
+    if len(data) == 0:
+        return None
+    elif len(data) == 1:
+        return [f'{data[0][0]} {data[0][1][0]}']
+
+
+def tree_program(data):
+    if data[0] is None:
+        return [f'{data[1][0]}']
+    else:
+        return [f'{data[0][0]}\n\n{data[1][0]}']
+
+
 class PrologParsers(TextParsers, whitespace='[ \t\n]*'):
 
     name = reg('[a-zA-Z_][a-zA-Z_0-9]*') > (lambda x: [x])
@@ -112,11 +126,11 @@ class PrologParsers(TextParsers, whitespace='[ \t\n]*'):
 
     definition = (atom & '.' | atom & ':-' & disjunction & '.') > tree_definition
 
-    module = ('module' & not_variable & '.') > (lambda x: [f'{x[0]} {x[1][0]}'])
+    module = opt('module' & not_variable & '.') > tree_module
 
     definitions = rep(definition) > tree_definitions
 
-    program = (module & definitions) > (lambda x: [f'{x[0][0]}\n\n{x[1][0]}'])
+    program = (module & definitions) > tree_program
 
 
 def to_parse(text: str, flag: str) -> (bool, str):
