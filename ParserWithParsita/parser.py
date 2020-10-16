@@ -1,6 +1,5 @@
 
 from parsita import *
-import re
 import sys
 
 
@@ -153,7 +152,7 @@ def main(filename: str, flag='--prog') -> bool:
     with open(filename, 'r') as file:
         text = file.read()
 
-    output_filename = re.search(r'[^.]+', filename).group(0) + '.out'
+    output_filename = filename + '.out'
     with open(output_filename, 'w') as file:
         verdict, message = to_parse(text, flag)
         file.write(message)
