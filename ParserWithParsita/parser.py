@@ -47,6 +47,10 @@ def tree_brackets_atom(data):
         return data
     elif len(data) == 3:
         data = delete_lists(data)
+        if data[1].count(' ') == 0:
+            return [data[1]]
+        if data[1][0] == '(' and data[1][len(data[1]) - 1] == ')':
+            return [data[1]]
         return [f'({data[1]})']
 
 
