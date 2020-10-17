@@ -217,3 +217,14 @@ def test_integrate_bad_atom(tmp_path, monkeypatch):
     monkeypatch.chdir(tmp_path)
     parser.main('a', '--atom')
     assert not parser.main('a', '--atom')
+
+
+def test_unit_atom():
+    atom = parser.PrologParsers.atom
+    assert atom.parse('a (a)').value[0] == 'a a'
+    assert atom.parse('a (a) (a) (a)').value[0] == 'a a a a'
+    assert atom.parse('a (((b))) (((d)))').value[0] == 'a b d'
+    assert atom.parse('a (c d)').value[0] == 'a (c d)'
+    assert atom.parse('a ((c d))').value[0] == 'a (c d)'
+    assert atom.parse('a ((c d)) e (c d)').value[0] == 'a (c d) e (c d)'
+    assert atom.parse('a ((b (((e)))))').value[0] == 'a (b e)'
